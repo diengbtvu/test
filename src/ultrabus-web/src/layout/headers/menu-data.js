@@ -1,0 +1,51 @@
+const menu_data = [
+  {
+    id: 1,
+    mega_menu: false,
+    has_dropdown: false,
+    title: "Trang chủ",
+    link: "/",
+    active: "active",
+  },
+  {
+    id: 2,
+    mega_menu: false,
+    has_dropdown: false,
+    title: "Đặt vé",
+    link: "/book-ticket",
+    active: "",
+  },
+  {
+    id: 3,
+    mega_menu: false,
+    has_dropdown: false,
+    title: "Tra cứu vé",
+    link: "/ticket",
+    active: "",
+  },
+  {
+    id: 4,
+    mega_menu: false,
+    has_dropdown: false,
+    title: "Tin tức",
+    link: "/news",
+    active: "",
+  },
+  {
+    id: 5,
+    mega_menu: false,
+    has_dropdown: false,
+    title: "Liên hệ",
+    link: "/contact",
+    active: "",
+  },
+  // {
+  //   id: 6,
+  //   mega_menu: false,
+  //   has_dropdown: false,
+  //   title: "Về chúng tôi",
+  //   link: "/about",
+  //   active: "",
+  // },
+];
+export default menu_data;
