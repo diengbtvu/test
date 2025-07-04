@@ -17,9 +17,9 @@ up:
 	@echo "🚀 Khởi động hệ thống UltraBus..."
 	docker-compose up --build -d
 	@echo "✅ Hệ thống đã khởi động!"
-	@echo "📱 Web: http://localhost:3001"
-	@echo "🔧 Admin: http://localhost:3000"
-	@echo "🌐 API: http://localhost:5000"
+	@echo "📱 Web: http://localhost:8082"
+	@echo "🔧 Admin: http://localhost:8081"
+	@echo "🌐 API: http://localhost:8080"
 
 # Dừng hệ thống
 down:

@@ -35,10 +35,11 @@ if errorlevel 1 (
 echo.
 echo 🎉 Hệ thống UltraBus đã khởi động thành công!
 echo ==================================
-echo 📱 Web người dùng:  http://localhost:3001
-echo 🔧 Admin panel:     http://localhost:3000
-echo 🌐 API Backend:     http://localhost:5000
-echo 🗄️  SQL Server:      localhost:1433
+echo 📱 Web người dùng:  http://localhost:8082
+echo 🔧 Admin panel:     http://localhost:8081
+echo 🌐 API Backend:     http://localhost:8080
+echo 📊 Swagger API:     http://localhost:8080/swagger
+echo 🗄️  SQL Server:      localhost:1434
 echo.
 echo Để dừng hệ thống, nhấn Ctrl+C
 pause

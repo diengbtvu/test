@@ -11,10 +11,10 @@ Dự án sử dụng **Entity Framework Core ORM** với **Code First approach**
 
 ## Cấu trúc dự án
 
-- **ultrabus-admin**: Giao diện quản trị (Next.js) - Port 3000
-- **ultrabus-web**: Giao diện người dùng (Next.js) - Port 3001  
-- **UltraBusAPI**: Backend API (.NET 8 + EF Core) - Port 5000
-- **SQL Server**: Cơ sở dữ liệu - Port 1433
+- **ultrabus-admin**: Giao diện quản trị (Next.js) - Port 8081
+- **ultrabus-web**: Giao diện người dùng (Next.js) - Port 8082  
+- **UltraBusAPI**: Backend API (.NET 8 + EF Core) - Port 8080
+- **SQL Server**: Cơ sở dữ liệu - Port 1434
 
 ## Yêu cầu hệ thống
 
@@ -63,11 +63,11 @@ docker-compose down -v
 
 Sau khi chạy thành công, bạn có thể truy cập:
 
-- **Web người dùng**: http://localhost:3001
-- **Admin panel**: http://localhost:3000  
-- **API Backend**: http://localhost:5000
-- **API Documentation (Swagger)**: http://localhost:5000/swagger
-- **SQL Server**: localhost:1433 (sa/YourStrong@Passw0rd)
+- **Web người dùng**: http://localhost:8082
+- **Admin panel**: http://localhost:8081  
+- **API Backend**: http://localhost:8080
+- **API Documentation (Swagger)**: http://localhost:8080/swagger
+- **SQL Server**: localhost:1434 (sa/YourStrong@Passw0rd)
 
 ## ⚡ Quá trình khởi động tự động
 
@@ -149,9 +149,23 @@ docker-compose up --build --force-recreate
 ### 4. Port đã được sử dụng:
 Thay đổi port trong file `.env`:
 ```bash
-API_PORT=5001
-ADMIN_PORT=3002
-WEB_PORT=3003
+# Sử dụng port range 8000
+API_PORT=8080
+ADMIN_PORT=8081
+WEB_PORT=8082
+DB_PORT=1434
+
+# Hoặc sử dụng port range 9000 (copy từ .env.alternative)
+API_PORT=9080
+ADMIN_PORT=9081
+WEB_PORT=9082
+DB_PORT=9434
+```
+
+Hoặc sử dụng file alternative:
+```bash
+cp .env.alternative .env
+docker-compose up --build
 ```
 
 ### 5. Reset hoàn toàn database:

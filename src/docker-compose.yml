@@ -8,7 +8,7 @@ services:
       SA_PASSWORD: ${DB_PASSWORD:-YourStrong@Passw0rd}
       MSSQL_PID: Express
     ports:
-      - "1433:1433"
+      - "${DB_PORT:-1434}:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
     networks:
@@ -31,7 +31,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:8080
     ports:
-      - "${API_PORT:-5000}:8080"
+      - "${API_PORT:-8080}:8080"
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -47,9 +47,9 @@ services:
     container_name: ultrabus-admin
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+      - NEXT_PUBLIC_API_URL=http://localhost:${API_PORT:-8080}
     ports:
-      - "${ADMIN_PORT:-3000}:3000"
+      - "${ADMIN_PORT:-8081}:3000"
     depends_on:
       - ultrabus-api
     networks:
@@ -64,9 +64,9 @@ services:
     container_name: ultrabus-web
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+      - NEXT_PUBLIC_API_URL=http://localhost:${API_PORT:-8080}
     ports:
-      - "${WEB_PORT:-3001}:3001"
+      - "${WEB_PORT:-8082}:3001"
     depends_on:
       - ultrabus-api
     networks:
