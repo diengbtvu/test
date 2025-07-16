@@ -1,10 +1,6 @@
 # BÁO CÁO DỰ ÁN
 # HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN TRỰC TUYẾN
-
- 
-
 ## MỤC LỤC
-
 1. [GIỚI THIỆU](#1-giới-thiệu)
    - 1.1. [Tên dự án và chủ đề](#11-tên-dự-án-và-chủ-đề)
    - 1.2. [Mục tiêu của ứng dụng](#12-mục-tiêu-của-ứng-dụng)
