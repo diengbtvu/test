@@ -1,7 +1,7 @@
 # BÁO CÁO DỰ ÁN
 # HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN TRỰC TUYẾN
 
----
+ 
 
 ## MỤC LỤC
 
@@ -41,7 +41,7 @@
    - 8.1. [Hướng dẫn cài đặt và chạy ứng dụng](#81-hướng-dẫn-cài-đặt-và-chạy-ứng-dụng)
    - 8.2. [Liên kết GitHub repository và link demo](#82-liên-kết-github-repository-và-link-demo)
 
----
+ 
 
 ## 1. GIỚI THIỆU
 
@@ -92,7 +92,7 @@ Hệ thống đặt phòng khách sạn có độ phức tạp vừa phải, bao
 **4. Khả năng mở rộng và phát triển:**
 Dự án có thể được mở rộng với nhiều tính năng nâng cao như tích hợp bản đồ, đánh giá khách sạn, hệ thống khuyến mãi, chatbot hỗ trợ... tạo nền tảng cho việc phát triển lâu dài.
 
----
+ 
 
 ## 2. PHÂN TÍCH YÊU CẦU
 
@@ -250,7 +250,7 @@ Hệ thống đặt phòng khách sạn được phân tích và thiết kế v�
 - **Database**: MySQL 8.0+
 - **Container runtime**: Docker 20.10+
 
----
+ 
 
 ## 3. THIẾT KẾ HỆ THỐNG
 
@@ -414,7 +414,7 @@ Hệ thống sử dụng Docker Compose để orchestrate các services:
 - Independent scaling
 - Technology diversity có thể
 
----
+ 
 
 ### 3.2. Thiết kế cơ sở dữ liệu
 
@@ -516,7 +516,7 @@ Ref: payments.booking_id > bookings.id
 Bảng này lưu trữ thông tin của tất cả người dùng hệ thống, bao gồm khách hàng và quản trị viên.
 
 | Tên trường | Kiểu dữ liệu | Mô tả |
-|------------|--------------|--------|
+|    |    --|  --|
 | id | INT, PK, AUTO_INCREMENT | Khóa chính |
 | email | VARCHAR(255), UNIQUE, NOT NULL | Email đăng nhập |
 | username | VARCHAR(100), UNIQUE, NOT NULL | Tên đăng nhập |
@@ -534,7 +534,7 @@ Bảng này lưu trữ thông tin của tất cả người dùng hệ thống, 
 Lưu trữ thông tin của các khách sạn trong hệ thống.
 
 | Tên trường | Kiểu dữ liệu | Mô tả |
-|------------|--------------|--------|
+|    |    --|  --|
 | id | INT, PK, AUTO_INCREMENT | Khóa chính |
 | name | VARCHAR(255), NOT NULL | Tên khách sạn |
 | description | TEXT | Mô tả chi tiết |
@@ -554,7 +554,7 @@ Lưu trữ thông tin của các khách sạn trong hệ thống.
 Lưu trữ thông tin các phòng của từng khách sạn.
 
 | Tên trường | Kiểu dữ liệu | Mô tả |
-|------------|--------------|--------|
+|    |    --|  --|
 | id | INT, PK, AUTO_INCREMENT | Khóa chính |
 | hotel_id | INT, FK, NOT NULL | Khóa ngoại tham chiếu hotels |
 | room_number | VARCHAR(10), NOT NULL | Số phòng |
@@ -574,7 +574,7 @@ Lưu trữ thông tin các phòng của từng khách sạn.
 Lưu trữ thông tin các đơn đặt phòng.
 
 | Tên trường | Kiểu dữ liệu | Mô tả |
-|------------|--------------|--------|
+|    |    --|  --|
 | id | INT, PK, AUTO_INCREMENT | Khóa chính |
 | user_id | INT, FK, NOT NULL | Khóa ngoại tham chiếu users |
 | room_id | INT, FK, NOT NULL | Khóa ngoại tham chiếu rooms |
@@ -594,7 +594,7 @@ Lưu trữ thông tin các đơn đặt phòng.
 Lưu trữ thông tin các giao dịch thanh toán.
 
 | Tên trường | Kiểu dữ liệu | Mô tả |
-|------------|--------------|--------|
+|    |    --|  --|
 | id | INT, PK, AUTO_INCREMENT | Khóa chính |
 | booking_id | INT, FK, NOT NULL | Khóa ngoại tham chiếu bookings |
 | amount | FLOAT, NOT NULL | Số tiền |
@@ -646,7 +646,7 @@ Lưu trữ thông tin các giao dịch thanh toán.
 - capacity > 0
 - star_rating BETWEEN 1 AND 5
 
----
+ 
 
 ### 3.3. Thiết kế API
 
@@ -669,7 +669,7 @@ http://[domain]/api/v1/[resource]
 **1. Authentication & Users**
 
 | Method | Endpoint | Mô tả | Auth Required |
-|--------|----------|-------|---------------|
+|  --|   -|  -|     |
 | POST | `/users/register` | Đăng ký tài khoản mới | No |
 | POST | `/users/login` | Đăng nhập | No |
 | GET | `/users/me` | Lấy thông tin profile | Yes |
@@ -681,7 +681,7 @@ http://[domain]/api/v1/[resource]
 **2. Hotels Management**
 
 | Method | Endpoint | Mô tả | Auth Required |
-|--------|----------|-------|---------------|
+|  --|   -|  -|     |
 | GET | `/hotels` | Danh sách khách sạn | No |
 | GET | `/hotels/{id}` | Chi tiết khách sạn | No |
 | POST | `/hotels` | Tạo khách sạn mới | Admin |
@@ -692,7 +692,7 @@ http://[domain]/api/v1/[resource]
 **3. Rooms Management**
 
 | Method | Endpoint | Mô tả | Auth Required |
-|--------|----------|-------|---------------|
+|  --|   -|  -|     |
 | GET | `/rooms` | Danh sách phòng | No |
 | GET | `/rooms/{id}` | Chi tiết phòng | No |
 | POST | `/rooms` | Tạo phòng mới | Admin |
@@ -704,7 +704,7 @@ http://[domain]/api/v1/[resource]
 **4. Bookings Management**
 
 | Method | Endpoint | Mô tả | Auth Required |
-|--------|----------|-------|---------------|
+|  --|   -|  -|     |
 | GET | `/bookings` | Danh sách booking | Yes |
 | GET | `/bookings/{id}` | Chi tiết booking | Yes |
 | POST | `/bookings` | Tạo booking mới | Yes |
@@ -716,7 +716,7 @@ http://[domain]/api/v1/[resource]
 **5. Payments Management**
 
 | Method | Endpoint | Mô tả | Auth Required |
-|--------|----------|-------|---------------|
+|  --|   -|  -|     |
 | GET | `/payments` | Danh sách thanh toán | Yes |
 | GET | `/payments/{id}` | Chi tiết thanh toán | Yes |
 | POST | `/payments` | Tạo thanh toán | Yes |
@@ -907,7 +907,7 @@ Giao diện được thiết kế theo phong cách hiện đại, tối giản v
 - Simplified forms
 - Offline capability (PWA future)
 
----
+ 
 
 ## 4. TRIỂN KHAI VÀ CÔNG NGHỆ SỬ DỤNG
 
@@ -1202,7 +1202,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 - Database migration strategy
 - Rollback procedures
 
----
+ 
 
 ## 5. QUẢN LÝ DỰ ÁN
 
@@ -1358,7 +1358,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 #### 5.2.2. Responsibility Matrix (RACI)
 
 | Task | Team Lead | Backend Dev | Frontend Dev | Full-stack | QA |
-|------|-----------|-------------|--------------|------------|-----|
+|  |   --|    -|    --|    | --|
 | Architecture Design | A | R | C | C | I |
 | API Development | A | R | I | C | I |
 | UI Development | A | I | R | C | I |
@@ -1424,7 +1424,7 @@ main
 - Acceptance criteria met
 - No critical bugs
 
----
+ 
 
 ## 6. KIỂM THỬ
 
@@ -1555,7 +1555,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
 **1. Authentication Endpoints**
 
 | Endpoint | Method | Test Cases | Status |
-|----------|--------|------------|--------|
+|   -|  --|    |  --|
 | /users/register | POST | Valid data, Duplicate email, Invalid email, Weak password | ✅ Pass |
 | /users/login | POST | Valid credentials, Invalid username, Wrong password, Inactive user | ✅ Pass |
 | /users/me | GET | Valid token, Expired token, No token, Invalid token | ✅ Pass |
@@ -1564,7 +1564,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
 **2. Hotel Management Endpoints**
 
 | Endpoint | Method | Test Cases | Status |
-|----------|--------|------------|--------|
+|   -|  --|    |  --|
 | /hotels | GET | No filters, Filter by city, Filter by rating, Pagination | ✅ Pass |
 | /hotels/{id} | GET | Valid ID, Invalid ID, Non-existent ID | ✅ Pass |
 | /hotels | POST | Valid data (Admin), Invalid data, Non-admin user | ✅ Pass |
@@ -1574,7 +1574,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
 **3. Room Management Endpoints**
 
 | Endpoint | Method | Test Cases | Status |
-|----------|--------|------------|--------|
+|   -|  --|    |  --|
 | /rooms | GET | All rooms, Filter by hotel, Filter by type, Price range | ✅ Pass |
 | /rooms/{id}/availability | GET | Available dates, Booked dates, Invalid date range | ✅ Pass |
 | /rooms | POST | Valid room data, Duplicate room number, Invalid hotel | ✅ Pass |
@@ -1582,7 +1582,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
 **4. Booking Endpoints**
 
 | Endpoint | Method | Test Cases | Status |
-|----------|--------|------------|--------|
+|   -|  --|    |  --|
 | /bookings | POST | Valid booking, Date conflict, Past dates, Over capacity | ✅ Pass |
 | /bookings/{id}/cancel | POST | Before check-in, After check-in, Already cancelled | ✅ Pass |
 | /bookings/{id}/confirm | POST | Admin confirm, Non-admin attempt, Already confirmed | ✅ Pass |
@@ -1592,7 +1592,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
 **Load Testing với Locust:**
 
 | Scenario | Users | RPS | Avg Response Time | 95% Percentile | Status |
-|----------|-------|-----|-------------------|----------------|--------|
+|   -|  -| --|      -|     -|  --|
 | Browse Hotels | 100 | 150 | 120ms | 200ms | ✅ Pass |
 | Search Rooms | 100 | 100 | 180ms | 300ms | ✅ Pass |
 | Create Booking | 50 | 25 | 250ms | 400ms | ✅ Pass |
@@ -1608,7 +1608,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
 **OWASP Top 10 Compliance:**
 
 | Vulnerability | Test Result | Mitigation |
-|--------------|-------------|------------|
+|    --|    -|    |
 | SQL Injection | ✅ Protected | SQLAlchemy ORM |
 | Broken Authentication | ✅ Protected | JWT với expiration |
 | Sensitive Data Exposure | ✅ Protected | Password hashing, HTTPS |
@@ -1665,7 +1665,7 @@ Kiểm thử là một phần quan trọng trong quy trình phát triển phần
    - Update tests với new features
    - Performance baseline monitoring
 
----
+ 
 
 ## 7. ĐÁNH GIÁ VÀ KẾT LUẬN
 
@@ -1855,7 +1855,7 @@ Những bài học rút ra từ dự án không chỉ về mặt kỹ thuật m�
 
 Với roadmap rõ ràng và các đề xuất cải thiện cụ thể, hệ thống có tiềm năng phát triển thành một giải pháp toàn diện cho ngành khách sạn, đáp ứng nhu cầu ngày càng cao của thị trường du lịch và hospitality.
 
----
+ 
 
 ## 8. PHỤ LỤC
 
@@ -2116,4 +2116,4 @@ sudo systemctl status docker  # Linux
 - **GitHub Repository**: [repository_url]
 - **Demo**: [demo_url]
 
----
+ 
