@@ -1,196 +1,165 @@
-## Thiết kế CSDL hệ thống quản lý đề thi trắc nghiệm Tin học THPT Quốc gia
+## Thiết kế CSDL rút gọn cho hệ thống đề thi trắc nghiệm Tin học THPT Quốc gia
 
 ### 1) Mô tả ERD (bằng văn bản)
-- **subjects**: Danh mục môn học (mở rộng được ngoài Tin học).
-  - Quan hệ: `subjects 1 — n exam_papers`.
-- **exam_papers**: Một đề thi cụ thể (biến thể mã đề) của một môn, một năm, có ngày thi và thời lượng.
-  - Thuộc tính: năm thi, ngày thi, thời lượng, mã đề (ví dụ 101, 102…), ràng buộc duy nhất trong phạm vi (môn, năm).
-  - Quan hệ: `exam_papers 1 — n exam_parts`.
-- **exam_parts**: Các phần của một đề (ví dụ: Phần I, Phần II) với loại phần: MULTI_CHOICE hoặc TRUE_FALSE.
-  - Thuộc tính: mã phần, tên phần, thứ tự phần, loại phần.
-  - Quan hệ: `exam_parts 1 — n questions`.
-- **questions**: Câu hỏi thuộc một phần cụ thể, có số thứ tự trong phần và nội dung.
-  - Thuộc tính: số thứ tự câu, nội dung câu hỏi.
-  - Quan hệ phân nhánh theo loại phần:
-    - Nếu phần là MULTI_CHOICE: `questions 1 — n mcq_options`; `questions 1 — 1 mcq_answer_key` (đáp án đúng).
-    - Nếu phần là TRUE_FALSE: `questions 1 — n tf_statements`; `tf_statements 1 — 1 tf_answer_key` (đúng/sai cho từng ý).
-- **mcq_options**: 4 phương án A/B/C/D cho câu MULTI_CHOICE (ràng buộc nhãn A–D và duy nhất theo câu).
-- **mcq_answer_key**: Khoá đáp án đúng cho câu MULTI_CHOICE, tham chiếu đúng về `mcq_options` của chính câu đó (không trộn đáp án bên trong bảng câu hỏi).
-- **tf_statements**: 4 ý nhỏ (Ý 1..4) cho câu TRUE_FALSE, duy nhất số ý trong phạm vi câu.
-- **tf_answer_key**: Khoá đúng/sai cho từng ý của câu TRUE_FALSE (không trộn vào bảng câu hỏi).
+Lược đồ tối giản còn 4 bảng, vẫn tách đáp án ra bảng riêng:
+- **exam_papers**: Thông tin một đề thi (môn, năm, ngày, thời lượng, mã đề). Dùng `subject_code` dạng text để giảm số bảng, vẫn đảm bảo mở rộng nhiều môn.
+- **questions**: Câu hỏi thuộc một đề, có `part_type` để phân biệt Phần I (MULTI_CHOICE) và Phần II (TRUE_FALSE), `question_number` đánh số trong từng phần.
+- **question_items**: 4 mục con của mỗi câu hỏi.
+  - Nếu `part_type = MULTI_CHOICE`: 4 lựa chọn, dùng `item_index` 1..4 (tương ứng A..D) và `content` là nội dung phương án.
+  - Nếu `part_type = TRUE_FALSE`: 4 ý nhỏ (ý 1..4), `item_index` 1..4 và `content` là nội dung ý.
+- **answer_keys**: Bảng đáp án riêng.
+  - Với MCQ: lưu 1 hàng chỉ ra mục đúng (item_index/chính xác là `item_id`).
+  - Với TRUE_FALSE: lưu 4 hàng (mỗi ý một hàng) với `is_true` là Đúng/Sai.
 
 Ràng buộc và tối ưu:
-- Khóa chính dạng số định danh (identity) cho tất cả bảng lõi.
-- Khóa ngoài có `ON DELETE CASCADE` cho bảng con để dọn dẹp dữ liệu nhất quán khi xoá đề/phần/câu.
-- Duy nhất: `(subject_id, exam_year, exam_code)`, `(exam_id, part_order)`, `(exam_id, part_code)`, `(part_id, question_number)`, `(question_id, label)` (A–D), `(question_id, statement_number)`.
-- Ràng buộc kiểm tra (CHECK): giới hạn giá trị hợp lệ cho năm, thời lượng, nhãn A–D, loại phần, số thứ tự.
-- Đáp án nằm ở các bảng riêng: `mcq_answer_key` và `tf_answer_key`.
-- Mở rộng: có thể thêm môn mới vào `subjects`, thêm năm/mã đề/phần/câu không cần đổi lược đồ.
+- Khóa ngoại `questions.exam_id → exam_papers.exam_id` (ON DELETE CASCADE).
+- Khóa ngoại `question_items.question_id → questions.question_id` (ON DELETE CASCADE).
+- Khóa ngoại kép trong `answer_keys (question_id, item_id)` tham chiếu `question_items (question_id, item_id)` để đảm bảo đáp án thuộc đúng câu.
+- Duy nhất:
+  - `(subject_code, exam_year, exam_code)` trong `exam_papers`.
+  - `(exam_id, part_type, question_number)` trong `questions` để đánh số lại theo phần.
+  - `(question_id, item_index)` trong `question_items` đảm bảo đúng 4 mục 1..4.
+- CHECK:
+  - `part_type IN ('MULTI_CHOICE','TRUE_FALSE')`.
+  - `item_index BETWEEN 1 AND 4`.
+  - Nên bổ sung trigger ở DB hoặc ràng buộc ở ứng dụng để đảm bảo: MCQ có đúng 4 item và đúng 1 đáp án; TRUE_FALSE có đúng 4 item và đủ 4 dòng đáp án (true/false).
 
 ### 2) Sơ đồ ERD (Mermaid)
 ```mermaid
 erDiagram
-    subjects ||--o{ exam_papers : has
-    exam_papers ||--o{ exam_parts : has
-    exam_parts ||--o{ questions : has
-
-    questions ||--o{ mcq_options : has
-    questions ||--o| mcq_answer_key : has
-
-    questions ||--o{ tf_statements : has
-    tf_statements ||--o| tf_answer_key : has
-
-    subjects {
-        bigint subject_id PK
-        text   code      UK
-        text   name
-    }
+    exam_papers ||--o{ questions : has
+    questions ||--o{ question_items : has
+    question_items ||--o{ answer_keys : has
 
     exam_papers {
-        bigint exam_id PK
-        bigint subject_id FK
+        bigint  exam_id PK
+        text    subject_code
         integer exam_year
         date    exam_date
         integer duration_minutes
         varchar exam_code
     }
 
-    exam_parts {
-        bigint part_id PK
-        bigint exam_id FK
-        smallint part_order
-        varchar  part_code
-        text     part_name
-        varchar  part_type  "MULTI_CHOICE | TRUE_FALSE"
-    }
-
     questions {
-        bigint question_id PK
-        bigint part_id FK
+        bigint  question_id PK
+        bigint  exam_id FK
+        varchar part_type  "MULTI_CHOICE | TRUE_FALSE"
         smallint question_number
-        text     content
+        text    content
     }
 
-    mcq_options {
-        bigint option_id PK
-        bigint question_id FK
-        char   label  "A|B|C|D"
-        text   content
+    question_items {
+        bigint  item_id PK
+        bigint  question_id FK
+        smallint item_index  "1..4"
+        text    content
     }
 
-    mcq_answer_key {
-        bigint question_id PK, FK
-        bigint correct_option_id FK
-    }
-
-    tf_statements {
-        bigint statement_id PK
-        bigint question_id FK
-        smallint statement_number
-        text     content
-    }
-
-    tf_answer_key {
-        bigint statement_id PK, FK
+    answer_keys {
+        bigint  question_id PK, FK
+        bigint  item_id    PK, FK
         boolean is_true
     }
 ```
 
 ### 3) Lệnh SQL tạo bảng (PostgreSQL)
 ```sql
--- Schema: THPTQG IT Exam (PostgreSQL dialect)
--- Gợi ý: chạy trong một transaction để tạo đồng bộ
 BEGIN;
-
-CREATE TABLE IF NOT EXISTS subjects (
-    subject_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    code             TEXT    NOT NULL UNIQUE,      -- ví dụ: "TIN", "TOAN"
-    name             TEXT    NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS exam_papers (
     exam_id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    subject_id       BIGINT  NOT NULL REFERENCES subjects(subject_id)
-                                 ON UPDATE CASCADE ON DELETE RESTRICT,
-    exam_year        INTEGER NOT NULL CHECK (exam_year BETWEEN 2000 AND 2100),
-    exam_date        DATE    NOT NULL,
-    duration_minutes INTEGER NOT NULL CHECK (duration_minutes BETWEEN 1 AND 300),
+    subject_code     TEXT       NOT NULL,               -- ví dụ: 'TIN', 'TOAN'
+    exam_year        INTEGER    NOT NULL CHECK (exam_year BETWEEN 2000 AND 2100),
+    exam_date        DATE       NOT NULL,
+    duration_minutes INTEGER    NOT NULL CHECK (duration_minutes BETWEEN 1 AND 300),
     exam_code        VARCHAR(20) NOT NULL,
-    CONSTRAINT uq_exam_per_subject_year_code
-        UNIQUE (subject_id, exam_year, exam_code)
-);
-
-CREATE TABLE IF NOT EXISTS exam_parts (
-    part_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    exam_id     BIGINT     NOT NULL REFERENCES exam_papers(exam_id)
-                               ON UPDATE CASCADE ON DELETE CASCADE,
-    part_order  SMALLINT   NOT NULL CHECK (part_order >= 1),
-    part_code   VARCHAR(20) NOT NULL,        -- ví dụ: "P1", "P2"
-    part_name   TEXT       NOT NULL,         -- ví dụ: "Phần I", "Phần II"
-    part_type   VARCHAR(20) NOT NULL CHECK (part_type IN ('MULTI_CHOICE','TRUE_FALSE')),
-    CONSTRAINT uq_part_order_per_exam UNIQUE (exam_id, part_order),
-    CONSTRAINT uq_part_code_per_exam  UNIQUE (exam_id, part_code)
+    CONSTRAINT uq_exam_per_subject_year_code UNIQUE (subject_code, exam_year, exam_code)
 );
 
 CREATE TABLE IF NOT EXISTS questions (
     question_id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    part_id          BIGINT    NOT NULL REFERENCES exam_parts(part_id)
+    exam_id          BIGINT    NOT NULL REFERENCES exam_papers(exam_id)
                                    ON UPDATE CASCADE ON DELETE CASCADE,
+    part_type        VARCHAR(20) NOT NULL CHECK (part_type IN ('MULTI_CHOICE','TRUE_FALSE')),
     question_number  SMALLINT  NOT NULL CHECK (question_number >= 1),
     content          TEXT      NOT NULL,
-    CONSTRAINT uq_question_number_per_part UNIQUE (part_id, question_number)
+    CONSTRAINT uq_question_number_per_part UNIQUE (exam_id, part_type, question_number)
 );
 
--- Phần I: Trắc nghiệm nhiều lựa chọn (A/B/C/D)
-CREATE TABLE IF NOT EXISTS mcq_options (
-    option_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    question_id  BIGINT   NOT NULL REFERENCES questions(question_id)
-                               ON UPDATE CASCADE ON DELETE CASCADE,
-    label        CHAR(1)  NOT NULL CHECK (label IN ('A','B','C','D')),
-    content      TEXT     NOT NULL,
-    CONSTRAINT uq_label_per_question UNIQUE (question_id, label),
-    -- Tạo unique pair để phục vụ FK kép từ mcq_answer_key
-    CONSTRAINT uq_option_per_question UNIQUE (question_id, option_id)
+CREATE INDEX IF NOT EXISTS idx_questions_exam_part ON questions(exam_id, part_type);
+
+CREATE TABLE IF NOT EXISTS question_items (
+    item_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    question_id   BIGINT    NOT NULL REFERENCES questions(question_id)
+                                ON UPDATE CASCADE ON DELETE CASCADE,
+    item_index    SMALLINT  NOT NULL CHECK (item_index BETWEEN 1 AND 4),
+    content       TEXT      NOT NULL,
+    CONSTRAINT uq_item_index_per_question UNIQUE (question_id, item_index),
+    -- Tạo unique pair để phục vụ FK kép từ answer_keys
+    CONSTRAINT uq_item_per_question UNIQUE (question_id, item_id)
 );
 
-CREATE TABLE IF NOT EXISTS mcq_answer_key (
-    question_id        BIGINT  NOT NULL PRIMARY KEY REFERENCES questions(question_id)
-                                          ON UPDATE CASCADE ON DELETE CASCADE,
-    correct_option_id  BIGINT  NOT NULL,
-    -- Đảm bảo option đúng thuộc về chính question_id này
-    CONSTRAINT fk_correct_pair FOREIGN KEY (question_id, correct_option_id)
-        REFERENCES mcq_options (question_id, option_id)
+CREATE INDEX IF NOT EXISTS idx_items_question ON question_items(question_id);
+
+CREATE TABLE IF NOT EXISTS answer_keys (
+    question_id  BIGINT   NOT NULL,
+    item_id      BIGINT   NOT NULL,
+    is_true      BOOLEAN  NOT NULL,
+    PRIMARY KEY (question_id, item_id),
+    CONSTRAINT fk_answer_pair FOREIGN KEY (question_id, item_id)
+        REFERENCES question_items (question_id, item_id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
-
--- Phần II: Trắc nghiệm Đúng/Sai gồm 4 ý nhỏ
-CREATE TABLE IF NOT EXISTS tf_statements (
-    statement_id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    question_id       BIGINT    NOT NULL REFERENCES questions(question_id)
-                                   ON UPDATE CASCADE ON DELETE CASCADE,
-    statement_number  SMALLINT  NOT NULL CHECK (statement_number BETWEEN 1 AND 4),
-    content           TEXT      NOT NULL,
-    CONSTRAINT uq_statement_number_per_question UNIQUE (question_id, statement_number)
-);
-
-CREATE TABLE IF NOT EXISTS tf_answer_key (
-    statement_id  BIGINT   NOT NULL PRIMARY KEY REFERENCES tf_statements(statement_id)
-                                     ON UPDATE CASCADE ON DELETE CASCADE,
-    is_true       BOOLEAN  NOT NULL
-);
-
--- Chỉ mục hỗ trợ truy vấn (tối ưu phổ biến)
-CREATE INDEX IF NOT EXISTS idx_exam_parts_exam ON exam_parts(exam_id);
-CREATE INDEX IF NOT EXISTS idx_questions_part ON questions(part_id);
-CREATE INDEX IF NOT EXISTS idx_mcq_options_question ON mcq_options(question_id);
-CREATE INDEX IF NOT EXISTS idx_tf_statements_question ON tf_statements(question_id);
 
 COMMIT;
 ```
 
-### 4) Ghi chú thiết kế và vận hành
-- **Tính mở rộng**: thêm môn mới vào `subjects`, thêm đề mới (năm, mã đề) vào `exam_papers`, thêm phần/câu/ý nhỏ không cần thay đổi lược đồ.
-- **Toàn vẹn tham chiếu**: dùng `ON DELETE CASCADE` cho bảng con để không sinh dữ liệu mồ côi khi xoá đề, phần, câu.
-- **Tách đáp án**: đáp án luôn nằm ở `mcq_answer_key` và `tf_answer_key`, không trộn trong `questions`, `mcq_options`, `tf_statements`.
-- **Ràng buộc loại phần**: ứng dụng nên đảm bảo chỉ tạo `mcq_options` cho phần `MULTI_CHOICE` và chỉ tạo `tf_statements` cho phần `TRUE_FALSE`. Nếu cần cưỡng bức ở DB, có thể thêm trigger kiểm tra `exam_parts.part_type` theo `questions.part_id`.
-- **Kiểm thử dữ liệu**: nên thêm kiểm tra ở tầng ứng dụng để bảo đảm mỗi câu MULTI_CHOICE có đúng 4 phương án A–D và mỗi câu TRUE_FALSE có đúng 4 ý.
+### 4) Prompt tạo entity JPA (Spring Boot)
+Dán nguyên khối prompt sau vào công cụ sinh mã (hoặc ChatGPT) để tạo entity, enum và repository theo đúng lược đồ trên:
+
+```
+Bạn là chuyên gia Spring Boot + JPA (Jakarta) với Java 17.
+Hãy sinh mã entity, enum và repository cho lược đồ PostgreSQL sau (4 bảng) với yêu cầu chi tiết:
+
+-- Lược đồ
+- exam_papers(exam_id PK, subject_code TEXT NOT NULL, exam_year INT, exam_date DATE, duration_minutes INT, exam_code VARCHAR(20), UNIQUE(subject_code, exam_year, exam_code))
+- questions(question_id PK, exam_id FK→exam_papers.exam_id, part_type VARCHAR(20) IN('MULTI_CHOICE','TRUE_FALSE'), question_number SMALLINT ≥1, content TEXT, UNIQUE(exam_id, part_type, question_number))
+- question_items(item_id PK, question_id FK→questions.question_id, item_index SMALLINT 1..4, content TEXT, UNIQUE(question_id, item_index), UNIQUE(question_id, item_id))
+- answer_keys(PK(question_id, item_id), is_true BOOLEAN, FK (question_id, item_id) → question_items(question_id, item_id))
+
+-- Yêu cầu chung
+1) Dùng Jakarta Persistence (import jakarta.persistence.*), Spring Boot 3.x, Java 17.
+2) Tạo enum PartType { MULTI_CHOICE, TRUE_FALSE } và map bằng @Enumerated(EnumType.STRING).
+3) Entity và mapping:
+   - ExamPaper ↔ Question: @OneToMany(mappedBy="exam", cascade = CascadeType.ALL, orphanRemoval = true), @ManyToOne trên Question.
+   - Question ↔ QuestionItem: @OneToMany(mappedBy="question", cascade = CascadeType.ALL, orphanRemoval = true), @ManyToOne trên QuestionItem.
+   - AnswerKey: có composite PK (question_id, item_id). Map bằng @Embeddable AnswerKeyId { Long questionId; Long itemId; } và @EmbeddedId trong AnswerKey.
+     + AnswerKey có @ManyToOne(optional=false) tới Question và QuestionItem với @MapsId("questionId")/@MapsId("itemId") để chia sẻ khóa tổng hợp.
+4) Ràng buộc @Table(uniqueConstraints, indexes) tương ứng với UNIQUE/INDEX ở trên.
+5) @Column(nullable = false) cho các cột NOT NULL. Dài chuỗi hợp lý (@Column(length = 20) cho exam_code). @Lob cho content TEXT nếu cần.
+6) @GeneratedValue(strategy = GenerationType.IDENTITY) cho khóa số tự tăng.
+7) Bean Validation: @NotBlank/@NotNull, @Min/@Max cho exam_year (2000..2100) và duration_minutes (1..300), @Min(1) cho question_number, @Min(1) @Max(4) cho item_index.
+8) Thiết kế domain logic:
+   - Với MULTI_CHOICE: phải có 4 QuestionItem (index 1..4) và đúng 1 AnswerKey có is_true = true.
+   - Với TRUE_FALSE: phải có 4 QuestionItem (index 1..4) và 4 AnswerKey (mỗi item một dòng) với is_true là giá trị đúng/sai.
+   - Không bắt buộc implement trigger; nếu thuận tiện, cung cấp @PrePersist/@PreUpdate để kiểm tra số lượng.
+9) Thêm Lombok: @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor, @Builder (khi phù hợp). Dùng @ToString(exclude = {...}) tránh vòng lặp.
+10) equals/hashCode chỉ dựa trên id (hoặc embedded id) theo best practice JPA.
+11) Viết 4 interface Spring Data JPA Repository: ExamPaperRepository, QuestionRepository, QuestionItemRepository, AnswerKeyRepository. Thêm một vài method mẫu: tìm đề theo (subjectCode, year, code), tìm câu theo examId + partType, truy vấn AnswerKey theo questionId, v.v.
+12) Thêm file PartType enum.
+13) Thêm chú thích ngắn trên mỗi class mô tả vai trò.
+
+-- Gợi ý tên class và trường
+- ExamPaper { Long id; String subjectCode; Integer examYear; LocalDate examDate; Integer durationMinutes; String examCode; Set<Question> questions }
+- Question { Long id; ExamPaper exam; PartType partType; Integer questionNumber; String content; Set<QuestionItem> items; Set<AnswerKey> answerKeys }
+- QuestionItem { Long id; Question question; Integer itemIndex; String content }
+- AnswerKeyId { Long questionId; Long itemId }
+- AnswerKey { AnswerKeyId id; Question question; QuestionItem item; Boolean isTrue }
+
+Vui lòng sinh đầy đủ mã Java với package ví dụ: com.example.exam.
+```
+
+### 5) Ghi chú
+- Thiết kế 4 bảng này tối giản nhưng vẫn tách đáp án ra khỏi bảng câu hỏi đúng theo yêu cầu.
+- Nếu muốn thêm bảng `subjects`, có thể chuyển `exam_papers.subject_code` thành FK mà không ảnh hưởng entity hiện tại (chỉ thêm entity Subject và sửa mapping).
+- Muốn cưỡng bức chính xác "đủ 4 item" và "đủ đáp án" ở tầng DB, có thể thêm trigger hoặc ràng buộc bằng stored procedure; ở entity, có thể kiểm trong @PrePersist/@PreUpdate.
